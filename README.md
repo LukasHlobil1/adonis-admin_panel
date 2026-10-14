@@ -1,304 +1,146 @@
-<div align="center">
+# Správa uživatelů v AdonisJS
 
-  <!-- Add your cover image here -->
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/adonisjs/starter-kits/blob/main/docs/hypermedia-dark.png?raw=true">
-    <img src="https://github.com/adonisjs/starter-kits/blob/main/docs/hypermedia-light.png?raw=true" alt="AdonisJS Hypermedia Starter Kit" width="100%">
-  </picture>
+Webová aplikace pro administraci uživatelů postavená na frameworku **[AdonisJS 7](https://adonisjs.com)** s databází **SQLite**.
 
-  <h1>Hypermedia Starter Kit</h1>
+Vychází z oficiální startovací šablony *Hypermedia Starter Kit* (serverové vykreslování šablon Edge + Alpine.js), na kterou navazuje vlastní administrací uživatelů.
 
-  <p>
-    <strong>A batteries-included AdonisJS starter kit for building modern server-rendered web applications.</strong>
-  </p>
+> Dokumentace s dojmy z práce, výhodami a nevýhodami a srovnáním s Laravelem je v souboru **[DOKUMENTACE.md](DOKUMENTACE.md)**.
 
-  <p>
-    Built for developers who believe in the power of hypermedia and want to ship fast without sacrificing DX.
-  </p>
+## Funkce
 
-  <br>
+**Administrace uživatelů** (`/admin/users`, jen pro administrátory)
 
-<a href="#-whats-in-the-box">Features</a>
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-<a href="#-quick-start">Quick Start</a>
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-<a href="https://adonisjs.com">Documentation</a>
+- výpis uživatelů se stránkováním (10 na stránku)
+- vyhledávání podle jména a e-mailu, filtr podle role a stavu účtu
+- řazení podle jména, role, data registrace a posledního přihlášení
+- vytvoření uživatele (jméno, e-mail, role, stav, heslo)
+- úprava uživatele včetně volitelné změny hesla
+- zablokování / odblokování účtu jedním kliknutím
+- smazání uživatele s potvrzením
 
-  <br>
-  <br>
+**Ochrany a pravidla**
 
-</div>
+- dvě role: `admin` a `user`; do administrace se dostane jen admin (middleware `admin`)
+- zablokovaný uživatel se nemůže přihlásit; pokud je zrovna přihlášený, je při dalším požadavku odhlášen (middleware `activeUser`)
+- administrátor nemůže smazat, zablokovat ani degradovat sám sebe
+- v systému vždy zůstane alespoň jeden aktivní administrátor
+- e-mail musí být unikátní, hesla se ukládají jako hash (scrypt)
+- ochrana proti CSRF útokům u všech formulářů
+- první uživatel zaregistrovaný do prázdné databáze se automaticky stane administrátorem
 
----
+**Ostatní**
 
-## ✨ What's in the Box
+- přehled (dashboard) se statistikami pro administrátory
+- stránka „Můj profil“ pro změnu jména, e-mailu a hesla
+- ukládání času posledního přihlášení
+- české rozhraní i chybové hlášky validace
+- světlý a tmavý režim
+- funkční testy (Japa)
 
-This starter kit is designed to help you build production-ready web applications with server-side rendering, progressive enhancement, and minimal JavaScript. It's perfect for building traditional web apps, admin panels, content sites, and SaaS applications.
+## Technologie
 
-### 🎯 Core Features
+| Oblast | Řešení |
+|---|---|
+| Framework | AdonisJS 7 (TypeScript, Node.js 24+) |
+| Databáze | SQLite (`better-sqlite3`), soubor `tmp/db.sqlite3` |
+| ORM a migrace | Lucid |
+| Validace | VineJS |
+| Autentizace | `@adonisjs/auth` – session guard |
+| Šablony | Edge + Alpine.js, styly v čistém CSS |
+| Testy | Japa (`@japa/api-client`) |
 
-- **🔐 Authentication System** - Complete user signup, login, and session management out of the box
-- **📝 Pre-built UI Components** - Form inputs, buttons, alerts, avatars, and more ready to use
-- **⚡️ Server-Side Rendering** - Fast initial page loads with Edge.js templating
-- **🎨 Custom Design System** - Hand-written CSS built on semantic design tokens, re-themed from one place in `app.css` (no framework bloat)
-- **🌗 Dark Mode** - Light and dark themes with a header toggle, remembered in a cookie and server-rendered with no flash
-- **🧩 Layouts** - Marketing, auth, app and settings layouts under `resources/views/components/layouts`
-- **📊 Dashboard** - An authenticated `/dashboard` route to land on after login or signup
-- **✅ Form Validation** - Powered by VineJS with automatic error handling
-- **🌊 Flash Messages** - Success/error notifications built-in
-- **🛡️ Security First** - CSRF protection, Shield middleware, and secure session handling
+## Spuštění
 
-### 🔧 Tech Stack
-
-<table>
-  <tr>
-    <td><strong>Backend</strong></td>
-    <td>
-      <a href="https://adonisjs.com">AdonisJS 7.x</a> - Full-featured Node.js framework
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Templates</strong></td>
-    <td>
-      <a href="https://edgejs.dev">Edge.js</a> - Powerful, expressive templating engine
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Database</strong></td>
-    <td>
-      <a href="https://lucid.adonisjs.com">Lucid ORM</a> - SQL ORM with migrations (SQLite, PostgreSQL, MySQL, MSSQL)
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Auth</strong></td>
-    <td>
-      Session-based authentication with secure cookie storage
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Frontend</strong></td>
-    <td>
-      <a href="https://alpinejs.dev">Alpine.js</a> - Lightweight JavaScript for sprinkles of interactivity
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Icons</strong></td>
-    <td>
-      <a href="https://github.com/edge-js/edge-iconify">Lucide via edge-iconify</a> - Inline SVG icons with the <code>@svg('lucide:…')</code> tag
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Styling</strong></td>
-    <td>
-      Hand-written CSS built on semantic design tokens, with light and dark themes
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Build</strong></td>
-    <td>
-      <a href="https://vitejs.dev">Vite</a> - Lightning-fast HMR and optimized builds
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Validation</strong></td>
-    <td>
-      <a href="https://vinejs.dev">VineJS</a> - Type-safe schema validation
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Testing</strong></td>
-    <td>
-      <a href="https://japa.dev">Japa</a> - Delightful testing framework with browser testing support
-    </td>
-  </tr>
-  <tr>
-    <td><strong>TypeScript</strong></td>
-    <td>
-      Full TypeScript support with strict mode enabled
-    </td>
-  </tr>
-</table>
-
----
-
-## 🚀 Quick Start
-
-### Create a New Project
+Požadavky: **Node.js 24 nebo novější** a npm.
 
 ```bash
-npm init adonisjs@latest -- -K=hypermedia
+# 1. stažení projektu
+git clone https://github.com/<uzivatel>/adonisjs-user-admin.git
+cd adonisjs-user-admin
+
+# 2. instalace závislostí
+npm install
+
+# 3. konfigurace prostředí
+cp .env.example .env
+node ace generate:key
+
+# 4. vytvoření databáze a naplnění ukázkovými daty
+node ace migration:run
+node ace db:seed
+
+# 5. spuštění vývojového serveru
+npm run dev
 ```
 
-This command will:
+Aplikace poběží na <http://localhost:3333>.
 
-- Clone this starter kit
-- Install all dependencies
-- Set up your `.env` file
-- Generate your app encryption key
-- Configure your database
-- Configure authentication
-- Run migrations
+### Přihlašovací údaje z ukázkových dat
 
-### Start Developing
+| Role | E-mail | Heslo |
+|---|---|---|
+| Administrátor | `admin@example.com` | `admin1234` |
+| Administrátor | `eva@example.com` | `heslo1234` |
+| Uživatel | `jana@example.com` | `heslo1234` |
+| Uživatel | `petr@example.com` | `heslo1234` |
+| Zablokovaný | `karel@example.com` | `heslo1234` |
+
+Bez spuštění seederu se lze zaregistrovat na `/signup` – první registrovaný uživatel dostane roli administrátora.
+
+### Další příkazy
 
 ```bash
-# Run the development server with hot reload
-node ace serve --hmr
-
-# Run tests
-node ace test
-
-# Type check your code
-npm run typecheck
-
-# Lint your code
-npm run lint
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+npm test                    # spuštění testů (používají vlastní databázi tmp/test.sqlite3)
+npm run typecheck           # kontrola typů TypeScriptu
+npm run build && npm start  # produkční sestavení a spuštění
+node ace migration:fresh --seed   # smazání a znovuvytvoření databáze s daty
 ```
 
-Your app will be running at `http://localhost:3333`
+## Struktura projektu
 
----
+Nejdůležitější soubory, které byly k šabloně přidány nebo upraveny:
 
-## 🧱 Adding Pages
-
-The kit ships the building blocks for app pages, without shipping pages you would have to delete.
-
-| Piece                                              | What it does                                                                                   |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `resources/views/components/page.edge`             | Renders the page heading, description and actions.                                             |
-| `resources/views/components/section.edge`          | A group of content within a page, with an optional title. Stacked sections get a divider.      |
-| `resources/views/components/layouts/settings.edge` | The settings area: a heading, a sidebar of links and a card holding the current settings page. |
-| `nav` in `components/layouts/app.edge`             | The top-level navigation. Add an entry for every new area of your app.                         |
-
-### A single page
-
-Render the page inside the app layout and wrap its content in `@page`. The document title is set on the layout. Leave out the `@page` title when the page should not render a heading. Buttons or links for the page header go in the `actions` slot.
-
-```edge
-{{-- resources/views/pages/reports.edge --}}
-@layouts.app({ title: 'Reports' })
-  @page({ title: 'Reports', description: 'Monthly numbers at a glance.' })
-    @slot('actions')
-      @link({ route: 'reports.export', class: 'btn btn--secondary btn--sm' })
-        Export
-      @end
-    @end
-    …
-  @end
-@end
+```
+app/
+  controllers/
+    admin/users_controller.ts   # CRUD administrace uživatelů
+    dashboard_controller.ts     # přehled se statistikami
+    profile_controller.ts       # vlastní profil a změna hesla
+    session_controller.ts       # přihlášení (kontrola blokace, poslední přihlášení)
+    new_account_controller.ts   # registrace (první uživatel = admin)
+  middleware/
+    admin_middleware.ts         # přístup jen pro adminy
+    active_user_middleware.ts   # odhlášení zablokovaných
+  models/user.ts                # model uživatele, role
+  services/user_stats.ts        # počty uživatelů pro statistiky
+  validators/user.ts            # validační schémata VineJS
+database/
+  migrations/                   # tabulka users + sloupce role, is_active, last_login_at
+  seeders/user_seeder.ts        # ukázkoví uživatelé
+  schema.ts                     # sloupce modelu (generuje se při migraci)
+resources/
+  views/pages/admin/users/      # seznam, vytvoření, úprava
+  views/pages/profile/          # profil
+  views/partials/admin/         # sdílené části (formulář, štítky)
+  css/app.css                   # styly
+start/
+  routes.ts                     # routy
+  kernel.ts                     # registrace middleware
+  validator.ts                  # české hlášky validace
+tests/functional/               # funkční testy
 ```
 
-Register a route for it and add an entry to `nav` in `resources/views/components/layouts/app.edge` to link to it.
+## Přehled rout
 
-To show content on a card, wrap it in `<div class="panel">`. The settings layout uses the same class for its content card.
-
-### Settings pages
-
-The settings layout is ready, it only needs pages. Start with a route group.
-
-```ts
-// start/routes.ts
-router
-  .group(() => {
-    router.on('/').render('pages/settings/profile').as('profile')
-    router.on('/security').render('pages/settings/security').as('security')
-  })
-  .prefix('/settings')
-  .as('settings')
-  .use(middleware.auth())
-```
-
-List the pages in `items` inside `resources/views/components/layouts/settings.edge`. The sidebar highlights the current one.
-
-```edge
-@let(items = [
-  { label: 'Profile', route: 'settings.profile', icon: 'lucide:user' },
-  { label: 'Security', route: 'settings.security', icon: 'lucide:shield' },
-])
-```
-
-Each page renders inside the settings layout, which renders the app layout for you.
-
-```edge
-{{-- resources/views/pages/settings/profile.edge --}}
-@layouts.settings({ title: 'Profile' })
-  @section({ title: 'Profile', description: 'This is how others will see you.' })
-    @field.root({ name: 'username' })
-      @!field.label({ text: 'Username' })
-      @!input.control()
-      <p class="field__hint">This is your public display name.</p>
-    @end
-  @end
-@end
-```
-
-Finally, add `{ label: 'Settings', route: 'settings.profile', icon: 'lucide:settings' }` to `nav` in the app layout. It stays active on every page under `/settings`.
-
-Need another area with a sidebar, like reports or admin? Copy `layouts/settings.edge`, change its heading and items. The `sidebar-layout` styles are shared.
-
----
-
-## 📚 Learn More
-
-<table>
-  <tr>
-    <td>
-      <a href="https://docs.adonisjs.com"><strong>📖 Documentation</strong></a>
-      <br>
-      <span>Complete guide to AdonisJS</span>
-    </td>
-    <td>
-      <a href="https://edgejs.dev"><strong>🎨 Edge.js Docs</strong></a>
-      <br>
-      <span>Learn about the template engine</span>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <a href="https://lucid.adonisjs.com"><strong>💾 Lucid ORM</strong></a>
-      <br>
-      <span>Database queries and relationships</span>
-    </td>
-    <td>
-      <a href="https://vinejs.dev"><strong>✅ VineJS</strong></a>
-      <br>
-      <span>Schema validation guide</span>
-    </td>
-  </tr>
-</table>
-
----
-
-## 🎨 Philosophy
-
-This starter kit embraces the **hypermedia-driven** approach to web development:
-
-- **Server-Side Rendering First** - Fast initial loads, SEO-friendly, works without JavaScript
-- **Progressive Enhancement** - Sprinkle interactivity where needed with Alpine.js
-- **Convention Over Configuration** - Sensible defaults, escape hatches when you need them
-- **Developer Experience** - Hot reload, TypeScript, great error messages
-- **Production Ready** - Security, validation, and testing built-in
-
----
-
-## 🤝 Contributing
-
-This starter kit is maintained by the AdonisJS team. Found a bug or have a suggestion? [Open an issue](https://github.com/adonisjs/starter-kits/issues) or submit a pull request!
-
----
-
-## 📄 License
-
-This starter kit is open-sourced software licensed under the [MIT license](LICENSE).
-
----
-
-<div align="center">
-  <sub>Built with ❤️ by the AdonisJS team</sub>
-</div>
+| Metoda | URL | Popis |
+|---|---|---|
+| GET | `/login`, `/signup` | přihlášení, registrace |
+| POST | `/logout` | odhlášení |
+| GET | `/dashboard` | přehled |
+| GET / PUT | `/profile` | profil |
+| PUT | `/profile/password` | změna hesla |
+| GET | `/admin/users` | seznam uživatelů |
+| GET / POST | `/admin/users/create`, `/admin/users` | nový uživatel |
+| GET / PUT | `/admin/users/:id/edit`, `/admin/users/:id` | úprava |
+| PATCH | `/admin/users/:id/status` | blokace / odblokování |
+| DELETE | `/admin/users/:id` | smazání |
