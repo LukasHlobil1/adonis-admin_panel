@@ -76,7 +76,11 @@ export default class UsersController {
    * Formulář pro vytvoření uživatele
    */
   async create({ view }: HttpContext) {
-    return view.render('pages/admin/users/create', { roles: USER_ROLES })
+    return view.render('pages/admin/users/create', {
+      roles: USER_ROLES,
+      editedUser: null,
+      isEdit: false,
+    })
   }
 
   /**
@@ -102,7 +106,12 @@ export default class UsersController {
    */
   async edit({ params, view }: HttpContext) {
     const user = await User.findOrFail(params.id)
-    return view.render('pages/admin/users/edit', { user, roles: USER_ROLES })
+    return view.render('pages/admin/users/edit', {
+      user,
+      editedUser: user,
+      roles: USER_ROLES,
+      isEdit: true,
+    })
   }
 
   /**

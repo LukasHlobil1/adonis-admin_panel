@@ -1,0 +1,51 @@
+@layouts.app({ title: 'Můj profil' })
+  @page({ title: 'Můj profil', description: 'Upravte své údaje a heslo.' })
+    <div class="stack-lg">
+      @form({ route: 'profile.update', class: 'panel form' })
+        @section({ title: 'Osobní údaje', description: 'Jméno a e-mail, kterým se přihlašujete.' })
+          <div class="form-grid">
+            @field.root({ name: 'fullName' })
+              @!field.label({ text: 'Celé jméno' })
+              @!input.control({ autocomplete: 'name', value: auth.user.fullName })
+              @!field.error()
+            @end
+            @field.root({ name: 'email' })
+              @!field.label({ text: 'E-mail' })
+              @!input.control({ type: 'email', autocomplete: 'email', value: auth.user.email })
+              @!field.error()
+            @end
+          </div>
+        @end
+        <div class="form__footer">
+          @!button({ text: 'Uložit profil', type: 'submit' })
+        </div>
+      @end
+
+      @form({ route: 'profile.password', class: 'panel form' })
+        @section({ title: 'Změna hesla', description: 'Pro změnu hesla zadejte i to stávající.' })
+          <div class="form-grid">
+            @field.root({ name: 'currentPassword' })
+              @!field.label({ text: 'Stávající heslo' })
+              @!input.control({ type: 'password', autocomplete: 'current-password' })
+              @!field.error()
+            @end
+            <div></div>
+            @field.root({ name: 'password' })
+              @!field.label({ text: 'Nové heslo' })
+              @!input.control({ type: 'password', autocomplete: 'new-password' })
+              @!field.error()
+            @end
+            @field.root({ name: 'passwordConfirmation' })
+              @!field.label({ text: 'Potvrzení nového hesla' })
+              @!input.control({ type: 'password', autocomplete: 'new-password' })
+              @!field.error()
+            @end
+          </div>
+        @end
+        <div class="form__footer">
+          @!button({ text: 'Změnit heslo', type: 'submit', variant: 'secondary' })
+        </div>
+      @end
+    </div>
+  @end
+@end

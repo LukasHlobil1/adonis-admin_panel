@@ -1,0 +1,20 @@
+@layouts.app({ title: 'Nový uživatel' })
+  @page({ title: 'Nový uživatel', description: 'Vytvořte účet a nastavte jeho roli.' })
+    @slot('actions')
+      @link({ route: 'admin.users.index', class: 'btn btn--secondary' })
+        @svg('lucide:arrow-left', { width: 15, height: 15 })
+        Zpět na seznam
+      @end
+    @end
+
+    @form({ route: 'admin.users.store', class: 'panel form' })
+      @include('partials/admin/user_form')
+      <div class="form__footer">
+        @link({ route: 'admin.users.index', class: 'btn btn--ghost' })
+          Zrušit
+        @end
+        @!button({ text: 'Vytvořit uživatele', type: 'submit' })
+      </div>
+    @end
+  @end
+@end

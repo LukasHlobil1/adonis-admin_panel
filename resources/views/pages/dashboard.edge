@@ -1,17 +1,98 @@
-@layouts.app({ title: 'Dashboard' })
-  @page()
-    <div class="empty">
-      <div class="empty__mark">
-        @svg('lucide:layout-grid', { width: 22, height: 22 })
+@layouts.app({ title: 'Přehled' })
+  @page({
+    title: `Dobrý den, ${auth.user.fullName || auth.user.email}`,
+    description: auth.user.isAdmin
+      ? 'Přehled uživatelů v systému.'
+      : 'Vítejte ve správě uživatelů. Zde vidíte informace o svém účtu.',
+  })
+    @slot('actions')
+      @if(auth.user.isAdmin)
+        @link({ route: 'admin.users.create', class: 'btn btn--primary' })
+          @svg('lucide:user-plus', { width: 16, height: 16 })
+          Nový uživatel
+        @end
+      @end
+    @end
+
+    @if(auth.user.isAdmin)
+      <div class="stats">
+        <div class="stat">
+          <span class="stat__label">Celkem uživatelů</span>
+          <span class="stat__value">{{ stats.total }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Administrátoři</span>
+          <span class="stat__value">{{ stats.admins }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Aktivní</span>
+          <span class="stat__value stat__value--ok">{{ stats.active }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Zablokovaní</span>
+          <span class="stat__value stat__value--danger">{{ stats.blocked }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Noví za 7 dní</span>
+          <span class="stat__value">{{ stats.newThisWeek }}</span>
+        </div>
       </div>
-      <h1>Your dashboard is ready</h1>
-      <p>
-        It's empty on purpose. A clean starting point with nothing to undo. Add your first route and component to begin.
-      </p>
-      <p class="mono" style="font-size: 12.5px; color: var(--subtle); margin-top: 4px;">
-        Start in
-        <span class="kbd">resources/views/pages/dashboard.edge</span>
-      </p>
-    </div>
+
+      <div class="panel panel--flush">
+        <div class="panel__head">
+          <h2 class="section__title">Naposledy registrovaní</h2>
+          @link({ route: 'admin.users.index', class: 'il' })
+            Všichni uživatelé →
+          @end
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Uživatel</th>
+              <th>Role</th>
+              <th>Stav</th>
+              <th>Registrován</th>
+            </tr>
+          </thead>
+          <tbody>
+            @each(user in recentUsers)
+              <tr>
+                <td>@include('partials/admin/user_cell')</td>
+                <td>@include('partials/admin/role_badge')</td>
+                <td>@include('partials/admin/status_badge')</td>
+                <td class="muted">{{ user.createdAt.setLocale('cs').toFormat('d. M. yyyy') }}</td>
+              </tr>
+            @end
+          </tbody>
+        </table>
+      </div>
+    @else
+      <div class="panel">
+        <dl class="details">
+          <div>
+            <dt>Celé jméno</dt>
+            <dd>{{ auth.user.fullName || '—' }}</dd>
+          </div>
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ auth.user.email }}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>Uživatel</dd>
+          </div>
+          <div>
+            <dt>Účet vytvořen</dt>
+            <dd>{{ auth.user.createdAt.setLocale('cs').toFormat('d. M. yyyy') }}</dd>
+          </div>
+        </dl>
+        <p style="margin-top: 20px;">
+          @link({ route: 'profile.edit', class: 'btn btn--secondary' })
+            @svg('lucide:pencil', { width: 15, height: 15 })
+            Upravit profil
+          @end
+        </p>
+      </div>
+    @end
   @end
 @end

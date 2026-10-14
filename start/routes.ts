@@ -11,7 +11,7 @@ import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
 
-router.on('/').render('pages/home').as('home')
+router.on('/').redirectToPath('/dashboard').as('home')
 
 /**
  * Přihlášení a registrace – jen pro nepřihlášené

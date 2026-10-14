@@ -1,0 +1,13 @@
+{{-- Buňka tabulky s avatarem, jménem a e-mailem. Očekává proměnnou `user`. --}}
+<div class="user-cell">
+  <span class="avatar">{{ user.initials }}</span>
+  <div class="user-cell__text">
+    <span class="user-cell__name">
+      {{ user.fullName || '—' }}
+      @if(auth.user && auth.user.id === user.id)
+        <span class="badge badge--muted">vy</span>
+      @end
+    </span>
+    <span class="user-cell__email">{{ user.email }}</span>
+  </div>
+</div>

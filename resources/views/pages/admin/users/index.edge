@@ -1,0 +1,185 @@
+{{--
+  Seznam uživatelů – vyhledávání, filtry, řazení, stránkování a akce.
+  Proměnné: users (paginator), filters, stats, roles
+--}}
+@let(sortColumns = [
+  { key: 'name', label: 'Uživatel' },
+  { key: 'role', label: 'Role' },
+  { key: null, label: 'Stav' },
+  { key: 'created', label: 'Registrován' },
+  { key: 'lastLogin', label: 'Poslední přihlášení' },
+])
+
+@layouts.app({ title: 'Uživatelé' })
+  @page({
+    title: 'Uživatelé',
+    description: `Celkem ${stats.total} uživatelů · ${stats.admins} administrátorů · ${stats.blocked} zablokovaných`,
+  })
+    @slot('actions')
+      @link({ route: 'admin.users.create', class: 'btn btn--primary' })
+        @svg('lucide:user-plus', { width: 16, height: 16 })
+        Nový uživatel
+      @end
+    @end
+
+    {{-- Filtry --}}
+    <form method="GET" action="{{ urlFor('admin.users.index') }}" class="toolbar">
+      <div class="toolbar__search">
+        @svg('lucide:search', { width: 16, height: 16 })
+        <input
+          type="search"
+          name="search"
+          value="{{ filters.search }}"
+          placeholder="Hledat jméno nebo e-mail…"
+          class="field__input"
+          aria-label="Hledat"
+        />
+      </div>
+
+      <select name="role" class="field__input" aria-label="Role">
+        <option value="">Všechny role</option>
+        <option value="admin" {{ filters.role === 'admin' ? 'selected' : '' }}>Administrátoři</option>
+        <option value="user" {{ filters.role === 'user' ? 'selected' : '' }}>Uživatelé</option>
+      </select>
+
+      <select name="status" class="field__input" aria-label="Stav">
+        <option value="">Všechny stavy</option>
+        <option value="active" {{ filters.status === 'active' ? 'selected' : '' }}>Aktivní</option>
+        <option value="blocked" {{ filters.status === 'blocked' ? 'selected' : '' }}>Zablokovaní</option>
+      </select>
+
+      <input type="hidden" name="sort" value="{{ filters.sort }}" />
+      <input type="hidden" name="direction" value="{{ filters.direction }}" />
+
+      <button type="submit" class="btn btn--secondary">Filtrovat</button>
+      @if(filters.search || filters.role || filters.status)
+        @link({ route: 'admin.users.index', class: 'btn btn--ghost' })
+          @svg('lucide:x', { width: 15, height: 15 })
+          Zrušit filtry
+        @end
+      @end
+    </form>
+
+    <div class="panel panel--flush">
+      @if(users.length)
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                @each(column in sortColumns)
+                  <th>
+                    @if(column.key)
+                      @let(isSorted = filters.sort === column.key)
+                      @let(nextDirection = isSorted && filters.direction === 'asc' ? 'desc' : 'asc')
+                      <a
+                        class="table__sort {{ isSorted ? 'is-active' : '' }}"
+                        href="{{ urlFor('admin.users.index', {}, { qs: { ...filters, sort: column.key, direction: nextDirection } }) }}"
+                      >
+                        {{ column.label }}
+                        @if(isSorted)
+                          @svg(filters.direction === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down', { width: 13, height: 13 })
+                        @end
+                      </a>
+                    @else
+                      {{ column.label }}
+                    @end
+                  </th>
+                @end
+                <th class="table__actions-head">Akce</th>
+              </tr>
+            </thead>
+            <tbody>
+              @each(user in users)
+                <tr>
+                  <td>@include('partials/admin/user_cell')</td>
+                  <td>@include('partials/admin/role_badge')</td>
+                  <td>@include('partials/admin/status_badge')</td>
+                  <td class="muted">{{ user.createdAt.setLocale('cs').toFormat('d. M. yyyy') }}</td>
+                  <td class="muted">
+                    {{ user.lastLoginAt ? user.lastLoginAt.setLocale('cs').toRelative() : 'Nikdy' }}
+                  </td>
+                  <td>
+                    <div class="table__actions">
+                      @link({
+                        route: 'admin.users.edit',
+                        routeParams: { id: user.id },
+                        class: 'iconbtn',
+                        title: 'Upravit',
+                        'aria-label': 'Upravit',
+                      })
+                        @svg('lucide:pencil', { width: 15, height: 15 })
+                      @end
+
+                      @if(user.id !== auth.user.id)
+                        @form({
+                          route: 'admin.users.toggle_status',
+                          routeParams: { id: user.id },
+                        })
+                          <button
+                            type="submit"
+                            class="iconbtn"
+                            title="{{ user.isActive ? 'Zablokovat' : 'Odblokovat' }}"
+                            aria-label="{{ user.isActive ? 'Zablokovat' : 'Odblokovat' }}"
+                          >
+                            @svg(user.isActive ? 'lucide:lock' : 'lucide:lock-open', { width: 15, height: 15 })
+                          </button>
+                        @end
+
+                        @form({
+                          route: 'admin.users.destroy',
+                          routeParams: { id: user.id },
+                          'x-data': '{}',
+                          'x-on:submit': `if (!confirm('Opravdu smazat uživatele ${user.email}? Tuto akci nelze vrátit.')) $event.preventDefault()`,
+                        })
+                          <button type="submit" class="iconbtn iconbtn--danger" title="Smazat" aria-label="Smazat">
+                            @svg('lucide:trash-2', { width: 15, height: 15 })
+                          </button>
+                        @end
+                      @end
+                    </div>
+                  </td>
+                </tr>
+              @end
+            </tbody>
+          </table>
+        </div>
+
+        {{-- Stránkování --}}
+        @if(users.hasPages)
+          <nav class="pagination" aria-label="Stránkování">
+            <span class="pagination__info">
+              Zobrazeno {{ (users.currentPage - 1) * users.perPage + 1 }}–{{ (users.currentPage - 1) * users.perPage + users.length }} z {{ users.total }}
+            </span>
+            <div class="pagination__pages">
+              @if(users.currentPage > 1)
+                <a class="iconbtn" href="{{ users.getPreviousPageUrl() }}" aria-label="Předchozí">
+                  @svg('lucide:chevron-left', { width: 15, height: 15 })
+                </a>
+              @end
+              @each(link in users.getUrlsForRange(1, users.lastPage))
+                <a
+                  class="pagination__page {{ link.isActive ? 'is-active' : '' }}"
+                  href="{{ link.url }}"
+                  {{ link.isActive ? 'aria-current=page' : '' }}
+                >{{ link.page }}</a>
+              @end
+              @if(users.currentPage < users.lastPage)
+                <a class="iconbtn" href="{{ users.getNextPageUrl() }}" aria-label="Další">
+                  @svg('lucide:chevron-right', { width: 15, height: 15 })
+                </a>
+              @end
+            </div>
+          </nav>
+        @end
+      @else
+        <div class="empty empty--inline">
+          <div class="empty__mark">
+            @svg('lucide:users', { width: 22, height: 22 })
+          </div>
+          <h2>Žádní uživatelé nenalezeni</h2>
+          <p>Zkuste upravit hledaný výraz nebo filtry.</p>
+        </div>
+      @end
+    </div>
+  @end
+@end

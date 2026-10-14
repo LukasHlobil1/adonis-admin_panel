@@ -1,0 +1,93 @@
+{{--
+  Společná pole formuláře pro vytvoření i úpravu uživatele.
+  Proměnné: roles, editedUser (při úpravě), isEdit
+--}}
+@let(hasOldInput = flashMessages.has('inputErrorsBag'))
+@let(currentRole = old('role') || (editedUser ? editedUser.role : 'user'))
+@let(isActiveChecked = hasOldInput ? !!old('isActive') : (editedUser ? editedUser.isActive : true))
+@let(isSelf = editedUser && auth.user.id === editedUser.id)
+
+@section({ title: 'Údaje', description: 'Základní informace o uživateli.' })
+  <div class="form-grid">
+    @field.root({ name: 'fullName' })
+      @!field.label({ text: 'Celé jméno' })
+      @!input.control({
+        autocomplete: 'off',
+        placeholder: 'Jan Novák',
+        value: editedUser ? editedUser.fullName : '',
+      })
+      @!field.error()
+    @end
+
+    @field.root({ name: 'email' })
+      @!field.label({ text: 'E-mail' })
+      @!input.control({
+        type: 'email',
+        autocomplete: 'off',
+        placeholder: 'jan@example.com',
+        value: editedUser ? editedUser.email : '',
+      })
+      @!field.error()
+    @end
+  </div>
+@end
+
+@section({ title: 'Oprávnění', description: 'Role určuje, zda má uživatel přístup do administrace.' })
+  <div class="form-grid">
+    @field.root({ name: 'role' })
+      @!field.label({ text: 'Role' })
+      <select name="role" id="role" class="field__input" {{ isSelf ? 'disabled' : '' }}>
+        @each(role in roles)
+          <option value="{{ role }}" {{ currentRole === role ? 'selected' : '' }}>
+            {{ role === 'admin' ? 'Administrátor' : 'Uživatel' }}
+          </option>
+        @end
+      </select>
+      @if(isSelf)
+        {{-- zakázaný select se neodesílá, proto hodnotu posíláme skrytě --}}
+        <input type="hidden" name="role" value="{{ editedUser.role }}" />
+        <span class="field__hint">Vlastní roli nemůžete změnit.</span>
+      @end
+      @!field.error()
+    @end
+
+    @field.root({ name: 'isActive' })
+      <span class="field__label">Stav účtu</span>
+      <label class="switch">
+        <input
+          type="checkbox"
+          name="isActive"
+          value="on"
+          {{ isActiveChecked ? 'checked' : '' }}
+          {{ isSelf ? 'disabled' : '' }}
+        />
+        <span>Aktivní – uživatel se může přihlásit</span>
+      </label>
+      @if(isSelf)
+        <input type="hidden" name="isActive" value="on" />
+      @end
+      @!field.error()
+    @end
+  </div>
+@end
+
+@section({
+  title: isEdit ? 'Změna hesla' : 'Heslo',
+  description: isEdit ? 'Pokud heslo nechcete měnit, nechte pole prázdné.' : 'Heslo musí mít 8–32 znaků.',
+})
+  <div class="form-grid">
+    @field.root({ name: 'password' })
+      @!field.label({ text: isEdit ? 'Nové heslo' : 'Heslo' })
+      @!input.control({ type: 'password', autocomplete: 'new-password', placeholder: '••••••••' })
+      @!field.error()
+    @end
+
+    @if(!isEdit)
+      @field.root({ name: 'passwordConfirmation' })
+        @!field.label({ text: 'Potvrzení hesla' })
+        @!input.control({ type: 'password', autocomplete: 'new-password', placeholder: '••••••••' })
+        @!field.error()
+      @end
+    @end
+  </div>
+@end

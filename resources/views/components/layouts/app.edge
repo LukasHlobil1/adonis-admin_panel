@@ -2,11 +2,17 @@
   Top-level app navigation. Add an entry here for every new area of your
   app, and it shows up in the navigation bar with its active state handled.
 --}}
-@let(nav = [{ label: 'Dashboard', route: 'dashboard', icon: 'lucide:house' }])
+@let(nav = [
+  { label: 'Přehled', route: 'dashboard', icon: 'lucide:house' },
+  { label: 'Můj profil', route: 'profile.edit', icon: 'lucide:user-round' },
+])
+@if(auth.user && auth.user.isAdmin)
+  @assign(nav = [...nav, { label: 'Uživatelé', route: 'admin.users.index', icon: 'lucide:users' }])
+@end
 @let(pageTitle = $props.get('title'))
 <!DOCTYPE html>
 <html
-  lang="en-us"
+  lang="cs"
   data-theme="{{
     request.plainCookie('app_theme', {
       defaultValue: 'light',
@@ -17,7 +23,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ pageTitle ? `${pageTitle} - AdonisJS` : 'AdonisJS — Starter Kit' }}</title>
+    <title>{{ pageTitle ? `${pageTitle} – Správa uživatelů` : 'Správa uživatelů – AdonisJS' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('dumper')
   </head>
@@ -26,11 +32,20 @@
       <div class="header__inner">
         @!logo({ size: 28 })
         <div class="header__right">
+          @if(auth.user)
+            <span class="header__user">
+              <span class="avatar avatar--sm">{{ auth.user.initials }}</span>
+              <span class="header__user-name">{{ auth.user.displayName }}</span>
+              @if(auth.user.isAdmin)
+                <span class="badge badge--admin">Admin</span>
+              @end
+            </span>
+          @end
           @!themeToggle()
           @form({ route: 'session.destroy', method: 'POST' })
             <button type="submit" class="btn btn--secondary btn--sm">
               @svg('lucide:log-out', { width: 15, height: 15 })
-              Log out
+              Odhlásit
             </button>
           @end
         </div>

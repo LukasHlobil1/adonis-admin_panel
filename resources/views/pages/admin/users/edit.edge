@@ -1,0 +1,47 @@
+@layouts.app({ title: 'Úprava uživatele' })
+  @page({
+    title: user.fullName || user.email,
+    description: `Registrován ${user.createdAt.setLocale('cs').toFormat('d. M. yyyy')} · poslední přihlášení: ${user.lastLoginAt ? user.lastLoginAt.setLocale('cs').toRelative() : 'nikdy'}`,
+  })
+    @slot('actions')
+      @link({ route: 'admin.users.index', class: 'btn btn--secondary' })
+        @svg('lucide:arrow-left', { width: 15, height: 15 })
+        Zpět na seznam
+      @end
+    @end
+
+    @form({
+      route: 'admin.users.update',
+      routeParams: { id: user.id },
+      class: 'panel form',
+    })
+      @include('partials/admin/user_form')
+      <div class="form__footer">
+        @link({ route: 'admin.users.index', class: 'btn btn--ghost' })
+          Zrušit
+        @end
+        @!button({ text: 'Uložit změny', type: 'submit' })
+      </div>
+    @end
+
+    @if(user.id !== auth.user.id)
+      <div class="panel danger-zone">
+        <div>
+          <h2 class="section__title">Smazání účtu</h2>
+          <p class="section__description">Uživatel bude trvale odstraněn. Tuto akci nelze vrátit.</p>
+        </div>
+        @form({
+          route: 'admin.users.destroy',
+          routeParams: { id: user.id },
+          'x-data': '{}',
+          'x-on:submit': `if (!confirm('Opravdu smazat uživatele ${user.email}?')) $event.preventDefault()`,
+        })
+          <button type="submit" class="btn btn--danger">
+            @svg('lucide:trash-2', { width: 15, height: 15 })
+            Smazat uživatele
+          </button>
+        @end
+      </div>
+    @end
+  @end
+@end
