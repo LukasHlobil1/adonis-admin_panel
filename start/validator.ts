@@ -12,7 +12,7 @@
 */
 
 import { DateTime } from 'luxon'
-import { VineDate } from '@vinejs/vine'
+import vine, { SimpleMessagesProvider, VineDate } from '@vinejs/vine'
 
 declare module '@vinejs/vine/types' {
   interface VineGlobalTransforms {
@@ -21,3 +21,29 @@ declare module '@vinejs/vine/types' {
 }
 
 VineDate.transform((value) => DateTime.fromJSDate(value))
+
+/**
+ * České chybové hlášky validace a názvy polí, které se do nich dosazují.
+ */
+vine.messagesProvider = new SimpleMessagesProvider(
+  {
+    'required': 'Pole {{ field }} je povinné.',
+    'string': 'Pole {{ field }} musí být text.',
+    'email': 'Zadejte platnou e-mailovou adresu.',
+    'minLength': 'Pole {{ field }} musí mít alespoň {{ min }} znaků.',
+    'maxLength': 'Pole {{ field }} může mít nejvýše {{ max }} znaků.',
+    'sameAs': 'Hesla se neshodují.',
+    'boolean': 'Neplatná hodnota pole {{ field }}.',
+    'enum': 'Zvolená hodnota pole {{ field }} není platná.',
+    'database.unique': 'Tento e-mail už používá jiný uživatel.',
+  },
+  {
+    fullName: 'Celé jméno',
+    email: 'E-mail',
+    password: 'Heslo',
+    passwordConfirmation: 'Potvrzení hesla',
+    currentPassword: 'Stávající heslo',
+    role: 'Role',
+    isActive: 'Aktivní',
+  }
+)

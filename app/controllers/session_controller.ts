@@ -1,4 +1,5 @@
 import User from '#models/user'
+import { DateTime } from 'luxon'
 import { loginValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -18,9 +19,21 @@ export default class SessionController {
   /**
    * Authenticate user credentials and create a new session
    */
-  async store({ request, auth, response }: HttpContext) {
+  async store({ request, auth, response, session }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
     const user = await User.verifyCredentials(email, password)
+
+    /**
+     * Zablokovaný uživatel se nesmí přihlásit, i když zadal správné heslo.
+     */
+    if (!user.isActive) {
+      session.flashExcept(['_csrf', 'password'])
+      session.flash('error', 'Váš účet je zablokovaný. Kontaktujte administrátora.')
+      return response.redirect().back()
+    }
+
+    user.lastLoginAt = DateTime.now()
+    await user.save()
 
     await auth.use('web').login(user)
     response.redirect().toRoute('dashboard')
