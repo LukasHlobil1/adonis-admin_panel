@@ -91,9 +91,15 @@
             <tbody>
               @each(user in users)
                 <tr>
-                  <td>@include('partials/admin/user_cell')</td>
-                  <td>@include('partials/admin/role_badge')</td>
-                  <td>@include('partials/admin/status_badge')</td>
+                  <td>
+                    @include('partials/admin/user_cell')
+                  </td>
+                  <td>
+                    @include('partials/admin/role_badge')
+                  </td>
+                  <td>
+                    @include('partials/admin/status_badge')
+                  </td>
                   <td class="muted">{{ user.createdAt.setLocale('cs').toFormat('d. M. yyyy') }}</td>
                   <td class="muted">
                     {{ user.lastLoginAt ? user.lastLoginAt.setLocale('cs').toRelative() : 'Nikdy' }}
