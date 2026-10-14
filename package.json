@@ -86,5 +86,8 @@
     "esbuild": true,
     "fsevents": true
   },
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "overrides": {
+    "@swc/core": "1.15.33"
+  }
 }
