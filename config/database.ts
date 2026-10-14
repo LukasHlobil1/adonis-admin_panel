@@ -19,7 +19,10 @@ const dbConfig = defineConfig({
     sqlite: {
       client: 'better-sqlite3',
       connection: {
-        filename: app.tmpPath('db.sqlite3'),
+        /**
+         * Testy používají vlastní databázový soubor, aby nesmazaly vývojová data.
+         */
+        filename: app.tmpPath(app.inTest ? 'test.sqlite3' : 'db.sqlite3'),
       },
       useNullAsDefault: true,
       migrations: {
